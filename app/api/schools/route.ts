@@ -26,6 +26,24 @@ export async function POST(request: Request) {
         const body = await request.json()
         const { name, district, address, contactName, contact, type } = body
 
+        // Validate required fields
+        if (!name || !district || !address || !contactName || !contact) {
+            return NextResponse.json(
+                { error: 'Missing required fields: name, district, address, contactName, and contact are required' },
+                { status: 400 }
+            )
+        }
+
+        // Validate phone number format (Sri Lankan)
+        const cleanPhone = contact.replace(/[\s-]/g, '')
+        const phoneRegex = /^(?:0\d{9}|\+947\d{8})$/
+        if (!phoneRegex.test(cleanPhone)) {
+            return NextResponse.json(
+                { error: 'Invalid phone number format. Please use Sri Lankan format (e.g., 0771234567 or +94771234567)' },
+                { status: 400 }
+            )
+        }
+
         console.log('Creating school with data:', { name, district, address, contactName, contact, type })
 
         const school = await prisma.school.create({

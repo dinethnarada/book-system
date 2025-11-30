@@ -95,6 +95,16 @@ export default function Dashboard() {
         }
     }
 
+    // Get allowed next statuses based on current status
+    const getAllowedNextStatuses = (currentStatus: string): string[] => {
+        const transitions: Record<string, string[]> = {
+            'PENDING': ['ASSIGNED'],
+            'ASSIGNED': ['FULFILLED'],
+            'FULFILLED': [] // Final state - no transitions
+        }
+        return transitions[currentStatus] || []
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <nav className="bg-white shadow-sm sticky top-0 z-10">
@@ -231,26 +241,36 @@ export default function Dashboard() {
                                             <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-2">
                                                 Update Status
                                             </label>
-                                            <div className="flex flex-col sm:flex-row gap-2">
-                                                <select
-                                                    id="status"
-                                                    className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 border px-4 py-2.5 transition-all appearance-none bg-white"
-                                                    value={selectedStatus}
-                                                    onChange={(e) => setSelectedStatus(e.target.value)}
-                                                >
-                                                    <option value="PENDING">Pending</option>
-                                                    <option value="ASSIGNED">Assigned</option>
-                                                    <option value="FULFILLED">Fulfilled</option>
-                                                </select>
-                                                <button
-                                                    onClick={handleUpdateStatus}
-                                                    disabled={updating || selectedStatus === request.status}
-                                                    className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
-                                                >
-                                                    <RefreshCw className={`w-4 h-4 ${updating ? 'animate-spin' : ''}`} />
-                                                    {updating ? 'Updating...' : 'Update'}
-                                                </button>
-                                            </div>
+                                            {request.status === 'FULFILLED' ? (
+                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+                                                    <p className="font-semibold">✓ Request Fulfilled</p>
+                                                    <p className="mt-1">This request has been completed and cannot be modified.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col sm:flex-row gap-2">
+                                                    <select
+                                                        id="status"
+                                                        className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 border px-4 py-2.5 transition-all appearance-none bg-white"
+                                                        value={selectedStatus}
+                                                        onChange={(e) => setSelectedStatus(e.target.value)}
+                                                    >
+                                                        <option value={request.status}>{request.status}</option>
+                                                        {getAllowedNextStatuses(request.status).map((status) => (
+                                                            <option key={status} value={status}>
+                                                                {status}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        onClick={handleUpdateStatus}
+                                                        disabled={updating || selectedStatus === request.status || getAllowedNextStatuses(request.status).length === 0}
+                                                        className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                                                    >
+                                                        <RefreshCw className={`w-4 h-4 ${updating ? 'animate-spin' : ''}`} />
+                                                        {updating ? 'Updating...' : 'Update'}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}

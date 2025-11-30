@@ -31,10 +31,35 @@ export default function CreateRequest() {
     const [contact, setContact] = useState('')
     const [type, setType] = useState('Primary')
 
+    // Phone validation state
+    const [phoneError, setPhoneError] = useState('')
+
     // Token modal state
     const [showTokenModal, setShowTokenModal] = useState(false)
     const [generatedToken, setGeneratedToken] = useState('')
     const [tokenCopied, setTokenCopied] = useState(false)
+
+    // Phone validation function for Sri Lankan numbers
+    const validatePhone = (phone: string): boolean => {
+        // Remove spaces and dashes for validation
+        const cleanPhone = phone.replace(/[\s-]/g, '')
+        // Sri Lankan phone patterns:
+        // Mobile: 07XXXXXXXX (10 digits starting with 07)
+        // International mobile: +947XXXXXXXX
+        // Landline: 0XXXXXXXXX (10 digits starting with 0)
+        const phoneRegex = /^(?:0\d{9}|\+947\d{8})$/
+        return phoneRegex.test(cleanPhone)
+    }
+
+    // Handle phone input change with validation
+    const handlePhoneChange = (value: string) => {
+        setContact(value)
+        if (value.trim() && !validatePhone(value)) {
+            setPhoneError('Please enter a valid Sri Lankan phone number (e.g., 0771234567 or +94771234567)')
+        } else {
+            setPhoneError('')
+        }
+    }
 
     useEffect(() => {
         // Fetch schools
@@ -85,6 +110,12 @@ export default function CreateRequest() {
         // Prevent submission if school already exists
         if (existingSchool) {
             alert('This school is already registered. Please contact the school administrator to submit a request.')
+            return
+        }
+
+        // Validate phone number
+        if (!validatePhone(contact)) {
+            setPhoneError('Please enter a valid Sri Lankan phone number before submitting')
             return
         }
 
@@ -212,9 +243,12 @@ export default function CreateRequest() {
                             </div>
 
                             <div>
-                                <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
+                                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                                    Address <span className="text-red-500">*</span>
+                                </label>
                                 <textarea
                                     id="address"
+                                    required
                                     disabled={!!existingSchool}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                     value={address}
@@ -225,10 +259,13 @@ export default function CreateRequest() {
                             </div>
 
                             <div>
-                                <label htmlFor="contactName" className="block text-sm font-medium text-gray-700">Contact Teacher Name</label>
+                                <label htmlFor="contactName" className="block text-sm font-medium text-gray-700">
+                                    Contact Name <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     id="contactName"
                                     type="text"
+                                    required
                                     disabled={!!existingSchool}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                     value={contactName}
@@ -238,16 +275,23 @@ export default function CreateRequest() {
                             </div>
 
                             <div>
-                                <label htmlFor="contact" className="block text-sm font-medium text-gray-700">Contact Number</label>
+                                <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
+                                    Contact Number <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     id="contact"
-                                    type="text"
+                                    type="tel"
+                                    required
                                     disabled={!!existingSchool}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                    className={`mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${phoneError ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     value={contact}
-                                    onChange={(e) => setContact(e.target.value)}
-                                    placeholder="Enter contact number"
+                                    onChange={(e) => handlePhoneChange(e.target.value)}
+                                    placeholder="e.g., 0771234567 or +94771234567"
                                 />
+                                {phoneError && (
+                                    <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+                                )}
                             </div>
 
                             <div>

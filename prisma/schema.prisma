@@ -15,9 +15,9 @@ model School {
   id          String   @id @default(cuid())
   name        String
   district    String
-  address     String?
-  contactName String?
-  contact     String?
+  address     String
+  contactName String
+  contact     String
   type        String?  // Primary, Secondary, etc.
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
