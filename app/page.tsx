@@ -367,16 +367,16 @@ export default function Home() {
 
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
           <div className="inline-block mb-4 px-4 py-2 bg-amber-500/20 backdrop-blur-sm border border-amber-400/30 rounded-full">
-            <span className="text-amber-200 font-semibold text-sm">🇱🇰 Supporting Flood-Affected Students in Sri Lanka</span>
+            <span className="text-amber-200 font-semibold text-sm">🇱🇰 Supporting Flood Affected Students In Sri Lanka</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 sm:mb-8 leading-tight">
-            Rebuilding Education,<br />
-            <span className="text-amber-300">One Book at a Time</span>
+            What We Can Do,<br />
+            <span className="text-amber-300">For Rebuild Education</span>
           </h1>
 
           <p className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 max-w-3xl mx-auto px-4 leading-relaxed text-teal-50">
-            When floods destroy schools and learning materials, we step in. Help us provide essential educational resources to students who need them most.
+            ගංවතුරෙන් අවතැන් වී සිටින ලමුන් සදහා පාසල් උපකරණ ලබාදීමේ වැඩසටහන. මේ ඔවුන්ට ඔබගේ උදව් අවශය මොහොතයි.
           </p>
         </div>
       </div>
@@ -400,11 +400,8 @@ export default function Home() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Submit a Request</h3>
                     <p className="text-gray-600 mb-6">
-                      Create a new material request for your school
+                      සිසුන් සදහා අවශය පාසල් උපකරණ සදහා ඉල්ලීමක් යොමුකරන්න
                     </p>
-                    <div className="inline-flex items-center gap-2 text-teal-600 font-semibold group-hover:gap-3 transition-all">
-                      Get Started <span>→</span>
-                    </div>
                   </div>
                 </div>
               </button>
@@ -419,13 +416,10 @@ export default function Home() {
                     <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 mb-6 shadow-lg group-hover:scale-110 transition-transform">
                       <Edit className="h-12 w-12 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Edit Request</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Edit Request Status</h3>
                     <p className="text-gray-600 mb-6">
-                      Update the status of an existing request
+                      ඉල්ලීමක නව තත්වය වෙනස් කිර්‍රම
                     </p>
-                    <div className="inline-flex items-center gap-2 text-teal-600 font-semibold group-hover:gap-3 transition-all">
-                      Manage Request <span>→</span>
-                    </div>
                   </div>
                 </div>
               </button>
@@ -439,9 +433,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">Current Material Requests</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">Material Requests</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-              Browse requests from schools affected by floods. Every contribution helps restore hope and education.
+              පාසල් උපකරණ සදහා ඉල්ලීම් සොයන්න
             </p>
 
             {/* Statistics */}
