@@ -28,7 +28,7 @@ async function main() {
             userId: user.id,
             schoolId: school.id,
             nic: '123456789V',
-            contact: '0771234567',
+            contactNumber: '0771234567',
             subjects: ['Math']
         }
     })

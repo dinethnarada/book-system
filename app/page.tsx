@@ -16,7 +16,7 @@ interface MaterialRequest {
     name: string
     district: string
     contactName: string | null
-    contact: string | null
+    contactNumber: string | null
   }
   items: {
     id: string
@@ -31,7 +31,7 @@ interface School {
   district: string
   address: string | null
   contactName: string | null
-  contact: string | null
+  contactNumber: string | null
   type: string
 }
 
@@ -69,8 +69,7 @@ export default function Home() {
   const [district, setDistrict] = useState('')
   const [address, setAddress] = useState('')
   const [contactName, setContactName] = useState('')
-  const [contact, setContact] = useState('')
-  const [type, setType] = useState('Primary')
+  const [contactNumber, setContactNumber] = useState('')
   const [phoneError, setPhoneError] = useState('')
   const [showTokenModal, setShowTokenModal] = useState(false)
   const [generatedToken, setGeneratedToken] = useState('')
@@ -84,7 +83,6 @@ export default function Home() {
       if (Array.isArray(data)) {
         setRequests(data)
       } else {
-        console.error('API returned non-array data:', data)
         setRequests([])
       }
     } catch (error) {
@@ -112,7 +110,7 @@ export default function Home() {
 
   // Handle phone input change with validation
   const handlePhoneChange = (value: string) => {
-    setContact(value)
+    setContactNumber(value)
     if (value.trim() && !validatePhone(value)) {
       setPhoneError('Please enter a valid Sri Lankan phone number (e.g., 0771234567 or +94771234567)')
     } else {
@@ -123,7 +121,7 @@ export default function Home() {
   // Check if school name exists
   useEffect(() => {
     if (schoolName.trim()) {
-      const found = schools.find(
+      const found = schools.length > 0 && schools.find(
         school => school.name.toLowerCase() === schoolName.trim().toLowerCase()
       )
       setExistingSchool(found || null)
@@ -132,8 +130,7 @@ export default function Home() {
         setDistrict(found.district)
         setAddress(found.address || '')
         setContactName(found.contactName || '')
-        setContact(found.contact || '')
-        setType(found.type)
+        setContactNumber(found.contactNumber || '')
       }
     } else {
       setExistingSchool(null)
@@ -164,7 +161,7 @@ export default function Home() {
       return
     }
 
-    if (!validatePhone(contact)) {
+    if (!validatePhone(contactNumber)) {
       setPhoneError('Please enter a valid Sri Lankan phone number before submitting')
       return
     }
@@ -180,8 +177,7 @@ export default function Home() {
           district,
           address,
           contactName,
-          contact,
-          type,
+          contactNumber,
         }),
       })
 
@@ -229,8 +225,7 @@ export default function Home() {
     setDistrict('')
     setAddress('')
     setContactName('')
-    setContact('')
-    setType('Primary')
+    setContactNumber('')
     setDescription('')
     setItems([{ material: '', quantity: 1 }])
     setPhoneError('')
@@ -582,10 +577,10 @@ export default function Home() {
                         <span className="line-clamp-1">{request.school.contactName}</span>
                       </div>
                     )}
-                    {request.school.contact && (
+                    {request.school.contactNumber && (
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Phone className="w-4 h-4 flex-shrink-0" />
-                        <span className="line-clamp-1">{request.school.contact}</span>
+                        <span className="line-clamp-1">{request.school.contactNumber}</span>
                       </div>
                     )}
                   </div>
@@ -624,9 +619,6 @@ export default function Home() {
                 <p className="text-gray-500 mb-4">
                   {requests.length === 0 ? 'No material requests yet.' : 'No requests match your search criteria.'}
                 </p>
-                <a href="/requests/create" className="inline-block mt-2 text-teal-600 hover:text-teal-800 font-semibold hover:underline">
-                  Create the first request →
-                </a>
               </div>
             </div>
           )}
@@ -637,7 +629,7 @@ export default function Home() {
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
               <h2 className="text-2xl font-bold text-gray-900">Edit Request</h2>
               <button
                 onClick={() => {
@@ -811,7 +803,7 @@ export default function Home() {
                         id="schoolName"
                         type="text"
                         required
-                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 transition-all"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 transition-all"
                         value={schoolName}
                         onChange={(e) => setSchoolName(e.target.value)}
                         placeholder="Enter school name"
@@ -876,7 +868,7 @@ export default function Home() {
                         id="address"
                         required
                         disabled={!!existingSchool}
-                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="Enter school address"
@@ -893,7 +885,7 @@ export default function Home() {
                         type="text"
                         required
                         disabled={!!existingSchool}
-                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         value={contactName}
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="Enter contact person name"
@@ -901,49 +893,23 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700 mb-2">
                         Contact Number <span className="text-red-500">*</span>
                       </label>
                       <input
-                        id="contact"
+                        id="contactNumber"
                         type="tel"
                         required
                         disabled={!!existingSchool}
-                        className={`mt-1 block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed ${phoneError ? 'border-red-500' : 'border-gray-300'
+                        className={`block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed ${phoneError ? 'border-red-500' : 'border-gray-300'
                           }`}
-                        value={contact}
+                        value={contactNumber}
                         onChange={(e) => handlePhoneChange(e.target.value)}
                         placeholder="e.g., 0771234567 or +94771234567"
                       />
                       {phoneError && (
                         <p className="mt-1 text-sm text-red-600">{phoneError}</p>
                       )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
-                        School Type <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <select
-                          id="type"
-                          required
-                          disabled={!!existingSchool}
-                          className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none bg-white cursor-pointer transition-all hover:border-teal-400"
-                          value={type}
-                          onChange={(e) => setType(e.target.value)}
-                        >
-                          <option value="Primary">Primary</option>
-                          <option value="Secondary">Secondary</option>
-                          <option value="Collegiate">Collegiate</option>
-                          <option value="Other">Other</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
                     </div>
                   </div>
 
@@ -956,7 +922,7 @@ export default function Home() {
                       required
                       disabled={!!existingSchool}
                       rows={3}
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Describe the materials needed and their purpose"
@@ -986,7 +952,7 @@ export default function Home() {
                             placeholder="Material Name (e.g., Textbooks)"
                             required
                             disabled={!!existingSchool}
-                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             value={item.material}
                             onChange={(e) => updateItem(index, 'material', e.target.value)}
                           />
@@ -997,7 +963,7 @@ export default function Home() {
                             min="1"
                             required
                             disabled={!!existingSchool}
-                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             value={item.quantity}
                             onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value))}
                           />

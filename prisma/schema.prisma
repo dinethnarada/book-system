@@ -17,8 +17,7 @@ model School {
   district    String
   address     String
   contactName String
-  contact     String
-  type        String?  // Primary, Secondary, etc.
+  contactNumber     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

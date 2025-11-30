@@ -24,18 +24,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { name, district, address, contactName, contact, type } = body
+        const { name, district, address, contactName, contactNumber } = body
 
         // Validate required fields
-        if (!name || !district || !address || !contactName || !contact) {
+        if (!name || !district || !address || !contactName || !contactNumber) {
             return NextResponse.json(
-                { error: 'Missing required fields: name, district, address, contactName, and contact are required' },
+                { error: 'Missing required fields: name, district, address, contactName, and contactNumber are required' },
                 { status: 400 }
             )
         }
 
         // Validate phone number format (Sri Lankan)
-        const cleanPhone = contact.replace(/[\s-]/g, '')
+        const cleanPhone = contactNumber.replace(/[\s-]/g, '')
         const phoneRegex = /^(?:0\d{9}|\+947\d{8})$/
         if (!phoneRegex.test(cleanPhone)) {
             return NextResponse.json(
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
             )
         }
 
-        console.log('Creating school with data:', { name, district, address, contactName, contact, type })
+        console.log('Creating school with data:', { name, district, address, contactName, contactNumber })
 
         const school = await prisma.school.create({
             data: {
@@ -52,8 +52,7 @@ export async function POST(request: Request) {
                 district,
                 address,
                 contactName,
-                contact,
-                type,
+                contactNumber,
             },
         })
         return NextResponse.json(school, { status: 201 })
