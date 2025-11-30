@@ -45,10 +45,10 @@ export async function PATCH(
         const { status } = body
 
         // Validate status
-        const validStatuses = ['PENDING', 'ASSIGNED', 'FULFILLED', 'REJECTED']
+        const validStatuses = ['PENDING', 'ASSIGNED', 'FULFILLED']
         if (!validStatuses.includes(status)) {
             return NextResponse.json(
-                { error: 'Invalid status. Must be one of: PENDING, ASSIGNED, FULFILLED, REJECTED' },
+                { error: 'Invalid status. Must be one of: PENDING, ASSIGNED, FULFILLED' },
                 { status: 400 }
             )
         }
