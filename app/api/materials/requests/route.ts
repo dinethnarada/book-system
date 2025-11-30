@@ -1,16 +1,20 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import crypto from 'crypto'
 
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { teacherId, description, urgency, items } = body
+        const { schoolId, description, items } = body
+
+        // Generate unique random token
+        const editToken = crypto.randomBytes(16).toString('hex')
 
         const result = await prisma.materialRequest.create({
             data: {
-                teacherId,
+                schoolId,
                 description,
-                urgency,
+                editToken,
                 items: {
                     create: items.map((item: any) => ({
                         material: item.material,
@@ -34,11 +38,7 @@ export async function GET(request: Request) {
     try {
         const requests = await prisma.materialRequest.findMany({
             include: {
-                teacher: {
-                    include: {
-                        school: true,
-                    },
-                },
+                school: true,
                 items: true,
             },
             orderBy: {

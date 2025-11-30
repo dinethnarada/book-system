@@ -1,16 +1,69 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, AlertCircle, CheckCircle, Copy, Check } from 'lucide-react'
+import { SRI_LANKA_DISTRICTS } from '@/lib/constants'
+
+interface School {
+    id: string
+    name: string
+    district: string
+    address: string | null
+    contactName: string | null
+    contact: string | null
+    type: string
+}
 
 export default function CreateRequest() {
     const router = useRouter()
-    const [teacherId, setTeacherId] = useState('') // Ideally fetched from auth context
+    const [schools, setSchools] = useState<School[]>([])
     const [description, setDescription] = useState('')
-    const [urgency, setUrgency] = useState('NORMAL')
     const [items, setItems] = useState([{ material: '', quantity: 1 }])
     const [loading, setLoading] = useState(false)
+
+    // Unified school form data
+    const [schoolName, setSchoolName] = useState('')
+    const [existingSchool, setExistingSchool] = useState<School | null>(null)
+    const [district, setDistrict] = useState('')
+    const [address, setAddress] = useState('')
+    const [contactName, setContactName] = useState('')
+    const [contact, setContact] = useState('')
+    const [type, setType] = useState('Primary')
+
+    // Token modal state
+    const [showTokenModal, setShowTokenModal] = useState(false)
+    const [generatedToken, setGeneratedToken] = useState('')
+    const [tokenCopied, setTokenCopied] = useState(false)
+
+    useEffect(() => {
+        // Fetch schools
+        fetch('/api/schools')
+            .then(res => res.json())
+            .then(data => setSchools(data))
+            .catch(err => console.error('Failed to fetch schools:', err))
+    }, [])
+
+    // Check if school name exists
+    useEffect(() => {
+        if (schoolName.trim()) {
+            const found = schools.find(
+                school => school.name.toLowerCase() === schoolName.trim().toLowerCase()
+            )
+            setExistingSchool(found || null)
+
+            // If found, populate fields with existing data
+            if (found) {
+                setDistrict(found.district)
+                setAddress(found.address || '')
+                setContactName(found.contactName || '')
+                setContact(found.contact || '')
+                setType(found.type)
+            }
+        } else {
+            setExistingSchool(null)
+        }
+    }, [schoolName, schools])
 
     const addItem = () => {
         setItems([...items, { material: '', quantity: 1 }])
@@ -28,26 +81,53 @@ export default function CreateRequest() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        // Prevent submission if school already exists
+        if (existingSchool) {
+            alert('This school is already registered. Please contact the school administrator to submit a request.')
+            return
+        }
+
         setLoading(true)
         try {
-            // For demo purposes, we might need a valid teacherId. 
-            // In a real app, this comes from the logged-in user.
-            // If teacherId is empty, the API will fail due to foreign key constraint.
-            // We'll assume the user inputs a valid ID for now or we fetch it.
+            // Create new school
+            const schoolRes = await fetch('/api/schools', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: schoolName,
+                    district,
+                    address,
+                    contactName,
+                    contact,
+                    type,
+                }),
+            })
 
+            if (!schoolRes.ok) {
+                alert('Failed to create school')
+                setLoading(false)
+                return
+            }
+
+            const newSchool = await schoolRes.json()
+
+            // Create the material request
             const res = await fetch('/api/materials/requests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    teacherId,
+                    schoolId: newSchool.id,
                     description,
-                    urgency,
                     items,
                 }),
             })
 
             if (res.ok) {
-                router.push('/dashboard') // Redirect to dashboard
+                const requestData = await res.json()
+                // Show token modal
+                setGeneratedToken(requestData.editToken)
+                setShowTokenModal(true)
             } else {
                 alert('Failed to create request')
             }
@@ -65,54 +145,153 @@ export default function CreateRequest() {
                 <h2 className="text-2xl font-bold mb-6 text-gray-900">Request Educational Materials</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
 
-                    {/* Teacher ID Input (Temporary until Auth is fully integrated) */}
-                    <div>
-                        <label htmlFor="teacherId" className="block text-sm font-medium text-gray-700">Teacher ID</label>
-                        <input
-                            id="teacherId"
-                            type="text"
-                            required
-                            placeholder="Enter your Teacher ID"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            value={teacherId}
-                            onChange={(e) => setTeacherId(e.target.value)}
-                        />
+                    {/* Unified School Information */}
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="schoolName" className="block text-sm font-medium text-gray-700">
+                                School Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="schoolName"
+                                type="text"
+                                required
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                value={schoolName}
+                                onChange={(e) => setSchoolName(e.target.value)}
+                                placeholder="Enter school name"
+                            />
+
+                            {/* Validation Message */}
+                            {schoolName.trim() && existingSchool && (
+                                <div className="mt-2 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                    <div className="text-sm text-red-800">
+                                        <p className="font-medium">School already registered</p>
+                                        <p className="mt-1">
+                                            This school ({existingSchool.name}) is already in our system.
+                                            Please contact the school administrator to submit a material request.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {schoolName.trim() && !existingSchool && (
+                                <div className="mt-2 flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                                    <div className="text-sm text-green-800">
+                                        <p className="font-medium">New school - please complete the details below</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Additional fields - shown always but disabled if school exists */}
+                        <div>
+                            <label htmlFor="district" className="block text-sm font-medium text-gray-700">
+                                District <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="district"
+                                required
+                                disabled={!!existingSchool}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                value={district}
+                                onChange={(e) => setDistrict(e.target.value)}
+                            >
+                                <option value="">Select District</option>
+                                {SRI_LANKA_DISTRICTS.map((dist) => (
+                                    <option key={dist} value={dist}>
+                                        {dist}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
+                            <textarea
+                                id="address"
+                                disabled={!!existingSchool}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                placeholder="Enter school address"
+                                rows={2}
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="contactName" className="block text-sm font-medium text-gray-700">Contact Teacher Name</label>
+                            <input
+                                id="contactName"
+                                type="text"
+                                disabled={!!existingSchool}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                value={contactName}
+                                onChange={(e) => setContactName(e.target.value)}
+                                placeholder="Enter contact person name"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="contact" className="block text-sm font-medium text-gray-700">Contact Number</label>
+                            <input
+                                id="contact"
+                                type="text"
+                                disabled={!!existingSchool}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                value={contact}
+                                onChange={(e) => setContact(e.target.value)}
+                                placeholder="Enter contact number"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+                                School Type <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="type"
+                                required
+                                disabled={!!existingSchool}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                value={type}
+                                onChange={(e) => setType(e.target.value)}
+                            >
+                                <option value="Primary">Primary</option>
+                                <option value="Secondary">Secondary</option>
+                                <option value="Collegiate">Collegiate</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                    <div className="border-t pt-6">
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            Request Description <span className="text-red-500">*</span>
+                        </label>
                         <textarea
                             id="description"
                             required
+                            disabled={!!existingSchool}
                             rows={3}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Describe the materials needed and their purpose"
                         />
-                    </div>
-
-                    <div>
-                        <label htmlFor="urgency" className="block text-sm font-medium text-gray-700">Urgency</label>
-                        <select
-                            id="urgency"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            value={urgency}
-                            onChange={(e) => setUrgency(e.target.value)}
-                        >
-                            <option value="LOW">Low</option>
-                            <option value="NORMAL">Normal</option>
-                            <option value="HIGH">High</option>
-                            <option value="CRITICAL">Critical</option>
-                        </select>
                     </div>
 
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                            <label className="block text-sm font-medium text-gray-700">Items Needed</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Items Needed <span className="text-red-500">*</span>
+                            </label>
                             <button
                                 type="button"
                                 onClick={addItem}
-                                className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                disabled={!!existingSchool}
+                                className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Plus className="w-4 h-4" /> Add Item
                             </button>
@@ -125,7 +304,8 @@ export default function CreateRequest() {
                                         type="text"
                                         placeholder="Material Name (e.g., Textbooks)"
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                        disabled={!!existingSchool}
+                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                         value={item.material}
                                         onChange={(e) => updateItem(index, 'material', e.target.value)}
                                     />
@@ -135,7 +315,8 @@ export default function CreateRequest() {
                                         type="number"
                                         min="1"
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                        disabled={!!existingSchool}
+                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                         value={item.quantity}
                                         onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value))}
                                     />
@@ -144,7 +325,8 @@ export default function CreateRequest() {
                                     <button
                                         type="button"
                                         onClick={() => removeItem(index)}
-                                        className="text-red-500 hover:text-red-700 p-2"
+                                        disabled={!!existingSchool}
+                                        className="text-red-500 hover:text-red-700 p-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
@@ -155,13 +337,72 @@ export default function CreateRequest() {
 
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                        disabled={loading || !!existingSchool}
+                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? 'Submitting...' : 'Submit Request'}
+                        {loading ? 'Submitting...' : existingSchool ? 'School Already Registered' : 'Submit Request'}
                     </button>
                 </form>
             </div>
+
+            {/* Token Modal */}
+            {showTokenModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-green-100 p-3 rounded-full">
+                                <CheckCircle className="w-6 h-6 text-green-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">Request Created Successfully!</h3>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-700 mb-3">
+                                Your material request has been submitted. Please save this unique token to update your request status later:
+                            </p>
+
+                            <div className="bg-gray-50 border border-gray-300 rounded-md p-3 mb-3">
+                                <div className="flex items-center justify-between gap-2">
+                                    <code className="text-sm font-mono text-gray-900 break-all flex-1">
+                                        {generatedToken}
+                                    </code>
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(generatedToken)
+                                            setTokenCopied(true)
+                                            setTimeout(() => setTokenCopied(false), 2000)
+                                        }}
+                                        className="flex-shrink-0 p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                        title="Copy to clipboard"
+                                    >
+                                        {tokenCopied ? (
+                                            <Check className="w-5 h-5 text-green-600" />
+                                        ) : (
+                                            <Copy className="w-5 h-5" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                                <p className="text-sm text-yellow-800">
+                                    <strong>⚠️ Important:</strong> Save this token in a safe place. You will need it to update your request status. This token cannot be recovered if lost.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setShowTokenModal(false)
+                                router.push('/dashboard')
+                            }}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
+                        >
+                            Go to Dashboard
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

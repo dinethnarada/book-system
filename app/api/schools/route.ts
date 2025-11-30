@@ -24,19 +24,23 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { name, district, address, contact, type } = body
+        const { name, district, address, contactName, contact, type } = body
+
+        console.log('Creating school with data:', { name, district, address, contactName, contact, type })
 
         const school = await prisma.school.create({
             data: {
                 name,
                 district,
                 address,
+                contactName,
                 contact,
                 type,
             },
         })
         return NextResponse.json(school, { status: 201 })
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to create school' }, { status: 500 })
+        console.error('Error creating school:', error)
+        return NextResponse.json({ error: 'Failed to create school', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
     }
 }
