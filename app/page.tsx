@@ -39,7 +39,12 @@ export default function Home() {
     try {
       const res = await fetch('/api/materials/requests')
       const data = await res.json()
-      setRequests(data)
+      if (Array.isArray(data)) {
+        setRequests(data)
+      } else {
+        console.error('API returned non-array data:', data)
+        setRequests([])
+      }
     } catch (error) {
       console.error('Failed to fetch requests', error)
     } finally {
