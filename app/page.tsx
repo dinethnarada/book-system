@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { FileText, MapPin, School as SchoolIcon, Clock, User, Phone, Search } from 'lucide-react'
+import { SRI_LANKA_DISTRICTS } from '@/lib/constants'
 
 interface MaterialRequest {
   id: string
@@ -56,8 +57,8 @@ export default function Home() {
     fetchRequests()
   }, [])
 
-  // Extract unique districts from requests only
-  const uniqueDistricts = Array.from(new Set(requests.map(req => req.school.district))).sort()
+  // Extract unique districts from requests only - REMOVED in favor of static list
+  // const uniqueDistricts = Array.from(new Set(requests.map(req => req.school.district))).sort()
 
   // Handle search button click
   const handleSearch = () => {
@@ -156,7 +157,7 @@ export default function Home() {
                 onChange={(e) => setSearchDistrict(e.target.value)}
               >
                 <option value="">All Districts</option>
-                {uniqueDistricts.map((district) => (
+                {SRI_LANKA_DISTRICTS.map((district) => (
                   <option key={district} value={district}>
                     {district}
                   </option>
