@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         const phoneRegex = /^(?:0\d{9}|\+947\d{8})$/
         if (!phoneRegex.test(cleanPhone)) {
             return NextResponse.json(
-                { error: 'Invalid phone number format. Please use Sri Lankan format (e.g., 0771234567 or +94771234567)' },
+                { error: 'Invalid phone number format. Please use Sri Lankan format (e.g., 0771234567)' },
                 { status: 400 }
             )
         }

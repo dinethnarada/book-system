@@ -112,7 +112,7 @@ export default function Home() {
   const handlePhoneChange = (value: string) => {
     setContactNumber(value)
     if (value.trim() && !validatePhone(value)) {
-      setPhoneError('Please enter a valid Sri Lankan phone number (e.g., 0771234567 or +94771234567)')
+      setPhoneError('Please enter a valid Sri Lankan phone number (e.g., 0771234567)')
     } else {
       setPhoneError('')
     }
@@ -905,7 +905,7 @@ export default function Home() {
                           }`}
                         value={contactNumber}
                         onChange={(e) => handlePhoneChange(e.target.value)}
-                        placeholder="e.g., 0771234567 or +94771234567"
+                        placeholder="e.g., 0771234567"
                       />
                       {phoneError && (
                         <p className="mt-1 text-sm text-red-600">{phoneError}</p>
