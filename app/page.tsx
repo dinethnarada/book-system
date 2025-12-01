@@ -633,6 +633,14 @@ export default function Home() {
           {/* Pagination Controls */}
           {!loading && requests.length > 0 && (
             <div className="flex justify-center items-center gap-4 mt-8 pb-12">
+              {currentPage > 1 && (
+                <button
+                  onClick={() => fetchRequests(1)}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium shadow-sm"
+                >
+                  First Page
+                </button>
+              )}
               <button
                 onClick={() => fetchRequests(currentPage - 1)}
                 disabled={currentPage === 1}
