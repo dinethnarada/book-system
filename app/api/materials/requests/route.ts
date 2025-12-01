@@ -78,6 +78,7 @@ export async function GET(request: Request) {
                             id: true,
                             name: true,
                             district: true,
+                            contactNumber: true,
                         },
                     },
                     items: true,
