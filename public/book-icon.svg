@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#14b8a6"/>
+  
+  <!-- Open book -->
+  <!-- Left page -->
+  <path d="M 8 10 Q 8 8 10 8 L 15 8 L 15 22 L 10 22 Q 8 22 8 20 Z" fill="#ffffff" stroke="#0d9488" stroke-width="0.5"/>
+  
+  <!-- Right page -->
+  <path d="M 17 8 L 22 8 Q 24 8 24 10 L 24 20 Q 24 22 22 22 L 17 22 Z" fill="#ffffff" stroke="#0d9488" stroke-width="0.5"/>
+  
+  <!-- Center binding -->
+  <line x1="16" y1="8" x2="16" y2="22" stroke="#0d9488" stroke-width="1"/>
+  
+  <!-- Page lines (left) -->
+  <line x1="10" y1="12" x2="14" y2="12" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="10" y1="14" x2="14" y2="14" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="10" y1="16" x2="14" y2="16" stroke="#cbd5e1" stroke-width="0.5"/>
+  
+  <!-- Page lines (right) -->
+  <line x1="18" y1="12" x2="22" y2="12" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="18" y1="14" x2="22" y2="14" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="18" y1="16" x2="22" y2="16" stroke="#cbd5e1" stroke-width="0.5"/>
+</svg>
