@@ -15,7 +15,7 @@ export async function DELETE(request: Request) {
     } catch (error) {
         console.error('Error resetting database:', error)
         return NextResponse.json(
-            { error: 'Failed to reset database' },
+            { error: 'Failed to reset database', details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         )
     }
