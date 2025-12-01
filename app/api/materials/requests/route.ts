@@ -40,11 +40,37 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
+    // Extract filters
+    const schoolName = searchParams.get('school')
+    const district = searchParams.get('district')
+    const status = searchParams.get('status')
+
+    // Build where clause
+    const where: any = {}
+
+    if (status) {
+        where.status = status
+    }
+
+    if (schoolName || district) {
+        where.school = {}
+        if (schoolName) {
+            where.school.name = {
+                contains: schoolName,
+                mode: 'insensitive',
+            }
+        }
+        if (district) {
+            where.school.district = district
+        }
+    }
+
     try {
         const [requests, total] = await Promise.all([
             prisma.materialRequest.findMany({
                 skip,
                 take: limit,
+                where,
                 include: {
                     school: {
                         select: {
@@ -60,7 +86,7 @@ export async function GET(request: Request) {
                     { createdAt: 'asc' }, // Oldest first
                 ],
             }),
-            prisma.materialRequest.count(),
+            prisma.materialRequest.count({ where }),
         ])
 
         const response = NextResponse.json({

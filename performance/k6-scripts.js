@@ -21,12 +21,22 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 
+const DISTRICTS = [
+    'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha',
+    'Hambantota', 'Jaffna', 'Kalutara', 'Kandy', 'Kegalle', 'Kilinochchi', 'Kurunegala',
+    'Mannar', 'Matale', 'Matara', 'Monaragala', 'Mullaitivu', 'Nuwara Eliya', 'Polonnaruwa',
+    'Puttalam', 'Ratnapura', 'Trincomalee', 'Vavuniya'
+];
+
 export default function () {
     group('School API', function () {
+        // Select a random district
+        const district = DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)];
+
         // 1. Create a School
         const schoolPayload = JSON.stringify({
             name: `Test School ${randomString(5)}`,
-            district: 'Colombo',
+            district: district,
             address: '123 Test St',
             contactName: 'Test Principal',
             contactNumber: '0771234567',
@@ -51,7 +61,7 @@ export default function () {
         }
 
         // 2. Get Schools
-        const getSchoolsRes = http.get(`${BASE_URL}/api/schools?district=Colombo`, { tags: { name: 'Get Schools' } });
+        const getSchoolsRes = http.get(`${BASE_URL}/api/schools?district=${district}`, { tags: { name: 'Get Schools' } });
         check(getSchoolsRes, {
             'get schools status is 200': (r) => r.status === 200,
             'get schools has data array': (r) => Array.isArray(r.json('data')),

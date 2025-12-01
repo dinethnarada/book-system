@@ -38,6 +38,8 @@ interface School {
 export default function Home() {
   const [requests, setRequests] = useState<MaterialRequest[]>([])
   const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [searchSchool, setSearchSchool] = useState('')
   const [searchDistrict, setSearchDistrict] = useState('')
   const [searchStatus, setSearchStatus] = useState('')
@@ -78,13 +80,25 @@ export default function Home() {
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (page = 1, filters = appliedFilters) => {
     setLoading(true)
     try {
-      const res = await fetch('/api/materials/requests')
+      const queryParams = new URLSearchParams()
+      queryParams.set('page', page.toString())
+      queryParams.set('limit', '10') // Display 10 items per page
+
+      if (filters.school) queryParams.set('school', filters.school)
+      if (filters.district) queryParams.set('district', filters.district)
+      if (filters.status) queryParams.set('status', filters.status)
+
+      const res = await fetch(`/api/materials/requests?${queryParams.toString()}`)
       const responseData = await res.json()
       if (responseData.data && Array.isArray(responseData.data)) {
         setRequests(responseData.data)
+        if (responseData.meta) {
+          setTotalPages(responseData.meta.totalPages)
+          setCurrentPage(responseData.meta.page)
+        }
       } else {
         setRequests([])
       }
@@ -237,11 +251,13 @@ export default function Home() {
 
   // Handle search button click
   const handleSearch = () => {
-    setAppliedFilters({
+    const newFilters = {
       school: searchSchool,
       district: searchDistrict,
       status: searchStatus
-    })
+    }
+    setAppliedFilters(newFilters)
+    fetchRequests(1, newFilters)
   }
 
   // Handle clear filters
@@ -249,11 +265,13 @@ export default function Home() {
     setSearchSchool('')
     setSearchDistrict('')
     setSearchStatus('')
-    setAppliedFilters({
+    const emptyFilters = {
       school: '',
       district: '',
       status: ''
-    })
+    }
+    setAppliedFilters(emptyFilters)
+    fetchRequests(1, emptyFilters)
   }
 
   // Dashboard handlers
@@ -327,15 +345,8 @@ export default function Home() {
   }
 
   // Filter requests based on applied search criteria
-  const filteredRequests = requests.filter((request) => {
-    const matchesSchool = appliedFilters.school === '' ||
-      request.school.name.toLowerCase().includes(appliedFilters.school.toLowerCase())
-    const matchesDistrict = appliedFilters.district === '' ||
-      request.school.district === appliedFilters.district
-    const matchesStatus = appliedFilters.status === '' ||
-      request.status === appliedFilters.status
-    return matchesSchool && matchesDistrict && matchesStatus
-  })
+  // Server-side filtering is now used, so we use requests directly
+  const filteredRequests = requests
 
   // Calculate statistics
   const pendingCount = requests.filter(r => r.status === 'PENDING').length
@@ -616,6 +627,29 @@ export default function Home() {
                   {requests.length === 0 ? 'No material requests yet.' : 'No requests match your search criteria.'}
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && requests.length > 0 && (
+            <div className="flex justify-center items-center gap-4 mt-8 pb-12">
+              <button
+                onClick={() => fetchRequests(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+              >
+                Previous
+              </button>
+              <span className="text-gray-600 font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => fetchRequests(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
