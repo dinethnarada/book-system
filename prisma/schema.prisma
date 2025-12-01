@@ -43,6 +43,7 @@ model MaterialRequest {
   @@index([schoolId])
   @@index([status])
   @@index([createdAt])
+  @@index([status, createdAt])
   @@schema("edu_support")
 }
 

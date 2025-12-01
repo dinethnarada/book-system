@@ -55,9 +55,10 @@ export async function GET(request: Request) {
                     },
                     items: true,
                 },
-                orderBy: {
-                    createdAt: 'desc',
-                },
+                orderBy: [
+                    { status: 'desc' }, // PENDING > FULFILLED > ASSIGNED (alphabetical desc: P, F, A)
+                    { createdAt: 'asc' }, // Oldest first
+                ],
             }),
             prisma.materialRequest.count(),
         ])
