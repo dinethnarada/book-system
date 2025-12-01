@@ -113,8 +113,11 @@ export async function GET(request: Request) {
             }
         })
 
+        // Remove editToken from requests for security
+        const sanitizedRequests = requests.map(({ editToken, ...request }) => request)
+
         const response = NextResponse.json({
-            data: requests,
+            data: sanitizedRequests,
             meta: {
                 total,
                 page,
