@@ -256,8 +256,12 @@ export default function Home() {
         setGeneratedToken(requestData.editToken)
         setShowSubmitModal(false)
         setShowTokenModal(true)
-        // Refresh requests list
-        fetchRequests()
+        // Refresh requests list - reset to page 1 with no filters to show new request
+        setAppliedFilters({ school: '', district: '', status: '' })
+        setSearchSchool('')
+        setSearchDistrict('')
+        setSearchStatus('')
+        fetchRequests(1, { school: '', district: '', status: '' })
         // Reset form
         resetSubmitForm()
       } else {
@@ -425,7 +429,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 max-w-3xl mx-auto px-4 leading-relaxed text-teal-50">
-            ගංවතුරෙන් අවතැන් වී සිටින ලමුන් සදහා පාසල් උපකරණ ලබාදීමේ වැඩසටහන. මේ ඔවුන්ට ඔබගේ උදව් අවශය මොහොතයි.
+            ගංවතුරෙන් අවතැන් වී සිටින ලමුන් සදහා පාසල් උපකරණ ලබාදීමේ වැඩසටහන. මේ ඔවුන්ට ඔබගේ උදව් අවශ්‍ය මොහොතයි.
           </p>
         </div>
       </div>
@@ -467,7 +471,7 @@ export default function Home() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Edit Request Status</h3>
                     <p className="text-gray-600 mb-6">
-                      ඉල්ලීමක නව තත්වය වෙනස් කිර්‍රම
+                      ඉල්ලීමක තත්වය වෙනස් කිර්‍රම
                     </p>
                   </div>
                 </div>
@@ -1170,7 +1174,7 @@ export default function Home() {
                           setShowDuplicateSchoolModal(false)
                           setShowSubmitModal(false)
                           setShowTokenModal(true)
-                          fetchRequests()
+                          setAppliedFilters({ school: '', district: '', status: '' }); setSearchSchool(''); setSearchDistrict(''); setSearchStatus(''); fetchRequests(1, { school: '', district: '', status: '' })
                           resetSubmitForm()
                         } else {
                           setErrorMessage('Failed to create request')
@@ -1230,7 +1234,7 @@ export default function Home() {
                           setShowDuplicateSchoolModal(false)
                           setShowSubmitModal(false)
                           setShowTokenModal(true)
-                          fetchRequests()
+                          setAppliedFilters({ school: '', district: '', status: '' }); setSearchSchool(''); setSearchDistrict(''); setSearchStatus(''); fetchRequests(1, { school: '', district: '', status: '' })
                           resetSubmitForm()
                         } else {
                           setErrorMessage('Failed to create request')
