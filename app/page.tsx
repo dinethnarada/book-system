@@ -463,7 +463,7 @@ export default function Home() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Submit a Request</h3>
                     <p className="text-gray-600 mb-6">
-                      සිසුන් සදහා අවශය පාසල් උපකරණ සදහා ඉල්ලීමක් යොමුකරන්න
+                      සිසුන් සදහා අවශ්‍ය පාසල් උපකරණ සදහා ඉල්ලීමක් යොමුකරන්න
                     </p>
                   </div>
                 </div>
@@ -481,7 +481,7 @@ export default function Home() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Edit Request Status</h3>
                     <p className="text-gray-600 mb-6">
-                      ඉල්ලීමක තත්වය වෙනස් කිර්‍රම
+                      පාසල් උපකරණ සදහා ඉල්ලීමක නව තත්වය වෙනස් කිර්‍රම
                     </p>
                   </div>
                 </div>
