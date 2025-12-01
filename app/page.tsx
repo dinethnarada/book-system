@@ -74,6 +74,9 @@ export default function Home() {
   const [showTokenModal, setShowTokenModal] = useState(false)
   const [generatedToken, setGeneratedToken] = useState('')
   const [tokenCopied, setTokenCopied] = useState(false)
+  const [showDuplicateSchoolModal, setShowDuplicateSchoolModal] = useState(false)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const fetchRequests = async () => {
     setLoading(true)
@@ -122,24 +125,7 @@ export default function Home() {
     }
   }
 
-  // Check if school name exists
-  useEffect(() => {
-    if (schoolName.trim()) {
-      const found = schools.length > 0 && schools.find(
-        school => school.name.toLowerCase() === schoolName.trim().toLowerCase()
-      )
-      setExistingSchool(found || null)
 
-      if (found) {
-        setDistrict(found.district)
-        setAddress(found.address || '')
-        setContactName(found.contactName || '')
-        setContactNumber(found.contactNumber || '')
-      }
-    } else {
-      setExistingSchool(null)
-    }
-  }, [schoolName, schools])
 
   // Item management functions
   const addItem = () => {
@@ -160,8 +146,16 @@ export default function Home() {
   const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (existingSchool) {
-      alert('This school is already registered. Please contact the school administrator to submit a request.')
+    // Check if school already exists when submitting (same name AND district)
+    const found = schools.length > 0 && schools.find(
+      school =>
+        school.name.toLowerCase() === schoolName.trim().toLowerCase() &&
+        school.district === district
+    )
+
+    if (found) {
+      setExistingSchool(found)
+      setShowDuplicateSchoolModal(true)
       return
     }
 
@@ -186,7 +180,9 @@ export default function Home() {
       })
 
       if (!schoolRes.ok) {
-        alert('Failed to create school')
+        const errorData = await schoolRes.json()
+        setErrorMessage(errorData.error || 'Failed to create school')
+        setShowErrorModal(true)
         setSubmitLoading(false)
         return
       }
@@ -214,11 +210,13 @@ export default function Home() {
         // Reset form
         resetSubmitForm()
       } else {
-        alert('Failed to create request')
+        setErrorMessage('Failed to create request')
+        setShowErrorModal(true)
       }
     } catch (error) {
       console.error(error)
-      alert('Error creating request')
+      setErrorMessage('Error creating request')
+      setShowErrorModal(true)
     } finally {
       setSubmitLoading(false)
     }
@@ -806,28 +804,6 @@ export default function Home() {
                         onChange={(e) => setSchoolName(e.target.value)}
                         placeholder="Enter school name"
                       />
-
-                      {schoolName.trim() && existingSchool && (
-                        <div className="mt-3 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-                          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                          <div className="text-sm text-red-800 flex-1">
-                            <p className="font-semibold mb-1">School already registered</p>
-                            <p>
-                              This school ({existingSchool.name}) is already in our system.
-                              Please contact the school administrator to submit a material request.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {schoolName.trim() && !existingSchool && (
-                        <div className="mt-3 flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                          <div className="text-sm text-green-800 flex-1">
-                            <p className="font-semibold">New school - please complete the details below</p>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div>
@@ -838,8 +814,7 @@ export default function Home() {
                         <select
                           id="district"
                           required
-                          disabled={!!existingSchool}
-                          className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none bg-white cursor-pointer transition-all hover:border-teal-400"
+                          className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 pr-10 appearance-none bg-white cursor-pointer transition-all hover:border-teal-400"
                           value={district}
                           onChange={(e) => setDistrict(e.target.value)}
                         >
@@ -865,8 +840,7 @@ export default function Home() {
                       <textarea
                         id="address"
                         required
-                        disabled={!!existingSchool}
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="Enter school address"
@@ -882,8 +856,7 @@ export default function Home() {
                         id="contactName"
                         type="text"
                         required
-                        disabled={!!existingSchool}
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5"
                         value={contactName}
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="Enter contact person name"
@@ -898,8 +871,7 @@ export default function Home() {
                         id="contactNumber"
                         type="tel"
                         required
-                        disabled={!!existingSchool}
-                        className={`block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed ${phoneError ? 'border-red-500' : 'border-gray-300'
+                        className={`block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 ${phoneError ? 'border-red-500' : 'border-gray-300'
                           }`}
                         value={contactNumber}
                         onChange={(e) => handlePhoneChange(e.target.value)}
@@ -918,9 +890,8 @@ export default function Home() {
                     <textarea
                       id="description"
                       required
-                      disabled={!!existingSchool}
                       rows={3}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Describe the materials needed and their purpose"
@@ -935,8 +906,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={addItem}
-                        disabled={!!existingSchool}
-                        className="text-sm text-teal-600 hover:text-teal-800 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-sm text-teal-600 hover:text-teal-800 flex items-center gap-1"
                       >
                         <Plus className="w-4 h-4" /> Add Item
                       </button>
@@ -949,8 +919,7 @@ export default function Home() {
                             type="text"
                             placeholder="Material Name (e.g., Textbooks)"
                             required
-                            disabled={!!existingSchool}
-                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5"
                             value={item.material}
                             onChange={(e) => updateItem(index, 'material', e.target.value)}
                           />
@@ -960,8 +929,7 @@ export default function Home() {
                             type="number"
                             min="1"
                             required
-                            disabled={!!existingSchool}
-                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500 border px-4 py-2.5"
                             value={item.quantity}
                             onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value))}
                           />
@@ -970,8 +938,7 @@ export default function Home() {
                           <button
                             type="button"
                             onClick={() => removeItem(index)}
-                            disabled={!!existingSchool}
-                            className="text-red-500 hover:text-red-700 p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-red-500 hover:text-red-700 p-2"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -982,11 +949,11 @@ export default function Home() {
 
                   <button
                     type="submit"
-                    disabled={submitLoading || !!existingSchool}
+                    disabled={submitLoading}
                     className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-teal-600 hover:bg-teal-700 active:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-md"
                   >
                     {submitLoading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
-                    {submitLoading ? 'Submitting...' : existingSchool ? 'School Already Registered' : 'Submit Request'}
+                    {submitLoading ? 'Submitting...' : 'Submit Request'}
                   </button>
                 </form>
               </div>
@@ -1059,6 +1026,90 @@ export default function Home() {
           </div>
         )
       }
+
+      {/* Duplicate School Error Modal */}
+      {
+        showDuplicateSchoolModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="bg-red-100 p-3 rounded-xl flex-shrink-0">
+                  <AlertCircle className="w-7 h-7 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">School Already Registered</h3>
+                  <p className="text-sm text-gray-600">This school is already in our system</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4 mb-4">
+                  <p className="text-sm text-gray-900 mb-2">
+                    <strong className="font-bold text-red-900">School Name:</strong> {existingSchool?.name}
+                  </p>
+                  <p className="text-sm text-gray-900">
+                    <strong className="font-bold text-red-900">District:</strong> {existingSchool?.district}
+                  </p>
+                </div>
+
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800 leading-relaxed">
+                    <strong className="font-bold">ℹ️ What to do:</strong> This school is already registered. Please contact the school administrator.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowDuplicateSchoolModal(false)
+                  setExistingSchool(null)
+                }}
+                className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-all font-semibold shadow-sm hover:shadow-md"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Generic Error Modal */}
+      {
+        showErrorModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="bg-red-100 p-3 rounded-xl flex-shrink-0">
+                  <AlertCircle className="w-7 h-7 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Error</h3>
+                  <p className="text-sm text-gray-600">Something went wrong</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+                  <p className="text-sm text-gray-900 leading-relaxed">
+                    {errorMessage}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowErrorModal(false)
+                  setErrorMessage('')
+                }}
+                className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-all font-semibold shadow-sm hover:shadow-md"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )
+      }
+
     </main >
   )
 }

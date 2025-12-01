@@ -75,6 +75,30 @@ export async function POST(request: Request) {
             )
         }
 
+        // Check if school with the same name AND district already exists
+        const existingSchool = await prisma.school.findFirst({
+            where: {
+                AND: [
+                    {
+                        name: {
+                            equals: name,
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        district: district
+                    }
+                ]
+            }
+        })
+
+        if (existingSchool) {
+            return NextResponse.json(
+                { error: 'A school with this name already exists in this district. Please contact the school administrator to submit a request.' },
+                { status: 409 }
+            )
+        }
+
         console.log('Creating school with data:', { name, district, address, contactName, contactNumber })
 
         const school = await prisma.school.create({
