@@ -61,10 +61,15 @@ export default function () {
         }
 
         // 2. Get Schools
-        const getSchoolsRes = http.get(`${BASE_URL}/api/schools?district=${district}`, { tags: { name: 'Get Schools' } });
+        const getSchoolsRes = http.get(`${BASE_URL}/api/schools?district=${encodeURIComponent(district)}`, { tags: { name: 'Get Schools' } });
+
+        if (getSchoolsRes.status !== 200) {
+            console.error(`Get Schools Failed. Status: ${getSchoolsRes.status}, Body: ${getSchoolsRes.body}`);
+        }
+
         check(getSchoolsRes, {
             'get schools status is 200': (r) => r.status === 200,
-            'get schools has data array': (r) => Array.isArray(r.json('data')),
+            'get schools has data array': (r) => r.json('data') && Array.isArray(r.json('data')),
             'get schools has meta': (r) => r.json('meta') !== undefined,
         });
 

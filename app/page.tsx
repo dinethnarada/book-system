@@ -77,6 +77,7 @@ export default function Home() {
   const [generatedToken, setGeneratedToken] = useState('')
   const [tokenCopied, setTokenCopied] = useState(false)
   const [showDuplicateSchoolModal, setShowDuplicateSchoolModal] = useState(false)
+  const [isSimilarMatch, setIsSimilarMatch] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -141,6 +142,19 @@ export default function Home() {
 
 
 
+  // Jaccard Index Similarity Check
+  const checkSimilarity = (str1: string, str2: string): boolean => {
+    const tokenize = (str: string) => new Set(str.toLowerCase().split(/\s+/))
+    const set1 = tokenize(str1)
+    const set2 = tokenize(str2)
+
+    const intersection = new Set([...set1].filter(x => set2.has(x)))
+    const union = new Set([...set1, ...set2])
+
+    const similarity = intersection.size / union.size
+    return similarity > 0.5 // Threshold for similarity
+  }
+
   // Item management functions
   const addItem = () => {
     setItems([...items, { material: '', quantity: 1 }])
@@ -161,14 +175,29 @@ export default function Home() {
     e.preventDefault()
 
     // Check if school already exists when submitting (same name AND district)
-    const found = schools.length > 0 && schools.find(
+    const exactMatch = schools.length > 0 && schools.find(
       school =>
         school.name.toLowerCase() === schoolName.trim().toLowerCase() &&
         school.district === district
     )
 
-    if (found) {
-      setExistingSchool(found)
+    if (exactMatch) {
+      setExistingSchool(exactMatch)
+      setIsSimilarMatch(false)
+      setShowDuplicateSchoolModal(true)
+      return
+    }
+
+    // Check for similar schools if no exact match
+    const similarMatch = schools.length > 0 && schools.find(
+      school =>
+        school.district === district &&
+        checkSimilarity(school.name, schoolName.trim())
+    )
+
+    if (similarMatch) {
+      setExistingSchool(similarMatch)
+      setIsSimilarMatch(true)
       setShowDuplicateSchoolModal(true)
       return
     }
@@ -246,6 +275,7 @@ export default function Home() {
     setItems([{ material: '', quantity: 1 }])
     setPhoneError('')
     setExistingSchool(null)
+    setIsSimilarMatch(false)
   }
 
 
@@ -1069,47 +1099,162 @@ export default function Home() {
         )
       }
 
-      {/* Duplicate School Error Modal */}
+      {/* Duplicate/Similar School Modal */}
       {
         showDuplicateSchoolModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
               <div className="flex items-start gap-4 mb-6">
-                <div className="bg-red-100 p-3 rounded-xl flex-shrink-0">
-                  <AlertCircle className="w-7 h-7 text-red-600" />
+                <div className={`${isSimilarMatch ? 'bg-yellow-100' : 'bg-red-100'} p-3 rounded-xl flex-shrink-0`}>
+                  <AlertCircle className={`w-7 h-7 ${isSimilarMatch ? 'text-yellow-600' : 'text-red-600'}`} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">School Already Registered</h3>
-                  <p className="text-sm text-gray-600">This school is already in our system</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                    {isSimilarMatch ? 'Similar School Found' : 'School Already Registered'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {isSimilarMatch
+                      ? 'We found a school with a similar name.'
+                      : 'This school is already in our system'}
+                  </p>
                 </div>
               </div>
 
               <div className="mb-6">
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4 mb-4">
+                <div className={`bg-gradient-to-br ${isSimilarMatch ? 'from-yellow-50 to-orange-50 border-yellow-200' : 'from-red-50 to-orange-50 border-red-200'} border-2 rounded-xl p-4 mb-4`}>
                   <p className="text-sm text-gray-900 mb-2">
-                    <strong className="font-bold text-red-900">School Name:</strong> {existingSchool?.name}
+                    <strong className={`font-bold ${isSimilarMatch ? 'text-yellow-900' : 'text-red-900'}`}>School Name:</strong> {existingSchool?.name}
                   </p>
                   <p className="text-sm text-gray-900">
-                    <strong className="font-bold text-red-900">District:</strong> {existingSchool?.district}
+                    <strong className={`font-bold ${isSimilarMatch ? 'text-yellow-900' : 'text-red-900'}`}>District:</strong> {existingSchool?.district}
                   </p>
                 </div>
 
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
-                  <p className="text-sm text-yellow-800 leading-relaxed">
-                    <strong className="font-bold">ℹ️ What to do:</strong> This school is already registered. Please contact the school administrator.
+                <div className="bg-gray-50 border-l-4 border-gray-400 rounded-lg p-4">
+                  <p className="text-sm text-gray-800 leading-relaxed">
+                    {isSimilarMatch
+                      ? <><strong className="font-bold">Did you mean this school?</strong> If yes, we can use the existing school details. If not, you can create a new one.</>
+                      : <><strong className="font-bold">ℹ️ What to do:</strong> This school is already registered. Please contact the school administrator.</>
+                    }
                   </p>
                 </div>
               </div>
 
-              <button
-                onClick={() => {
-                  setShowDuplicateSchoolModal(false)
-                  setExistingSchool(null)
-                }}
-                className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-all font-semibold shadow-sm hover:shadow-md"
-              >
-                Close
-              </button>
+              {isSimilarMatch ? (
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={async () => {
+                      if (!existingSchool) return
+                      setSubmitLoading(true)
+                      try {
+                        const res = await fetch('/api/materials/requests', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            schoolId: existingSchool.id,
+                            description,
+                            items,
+                          }),
+                        })
+
+                        if (res.ok) {
+                          const requestData = await res.json()
+                          setGeneratedToken(requestData.editToken)
+                          setShowDuplicateSchoolModal(false)
+                          setShowSubmitModal(false)
+                          setShowTokenModal(true)
+                          fetchRequests()
+                          resetSubmitForm()
+                        } else {
+                          setErrorMessage('Failed to create request')
+                          setShowErrorModal(true)
+                        }
+                      } catch (error) {
+                        console.error(error)
+                        setErrorMessage('Error creating request')
+                        setShowErrorModal(true)
+                      } finally {
+                        setSubmitLoading(false)
+                      }
+                    }}
+                    disabled={submitLoading}
+                    className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-all font-semibold shadow-sm hover:shadow-md flex justify-center items-center gap-2"
+                  >
+                    {submitLoading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                    Yes, Use This School
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setSubmitLoading(true)
+                      try {
+                        const schoolRes = await fetch('/api/schools', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            name: schoolName,
+                            district,
+                            address,
+                            contactName,
+                            contactNumber,
+                          }),
+                        })
+
+                        if (!schoolRes.ok) {
+                          const errorData = await schoolRes.json()
+                          setErrorMessage(errorData.error || 'Failed to create school')
+                          setShowErrorModal(true)
+                          return
+                        }
+
+                        const newSchool = await schoolRes.json()
+                        const res = await fetch('/api/materials/requests', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            schoolId: newSchool.id,
+                            description,
+                            items,
+                          }),
+                        })
+
+                        if (res.ok) {
+                          const requestData = await res.json()
+                          setGeneratedToken(requestData.editToken)
+                          setShowDuplicateSchoolModal(false)
+                          setShowSubmitModal(false)
+                          setShowTokenModal(true)
+                          fetchRequests()
+                          resetSubmitForm()
+                        } else {
+                          setErrorMessage('Failed to create request')
+                          setShowErrorModal(true)
+                        }
+                      } catch (error) {
+                        console.error(error)
+                        setErrorMessage('Error creating request')
+                        setShowErrorModal(true)
+                      } finally {
+                        setSubmitLoading(false)
+                      }
+                    }}
+                    disabled={submitLoading}
+                    className="w-full bg-white border-2 border-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all font-semibold"
+                  >
+                    No, Create New School
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowDuplicateSchoolModal(false)
+                    setExistingSchool(null)
+                    setIsSimilarMatch(false)
+                  }}
+                  className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-all font-semibold shadow-sm hover:shadow-md"
+                >
+                  Close
+                </button>
+              )}
             </div>
           </div>
         )
