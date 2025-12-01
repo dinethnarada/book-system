@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FileText, MapPin, School as SchoolIcon, Clock, User, Phone, Search, Edit, Plus, RefreshCw, Key, Trash2, AlertCircle, CheckCircle, Copy, Check } from 'lucide-react'
+import { FileText, MapPin, School as SchoolIcon, Clock, User, Phone, Search, Edit, Plus, RefreshCw, Key, Trash2, AlertCircle, CheckCircle, Copy, Check, BookOpen } from 'lucide-react'
 import { SRI_LANKA_DISTRICTS } from '@/lib/constants'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -431,6 +431,16 @@ export default function Home() {
           <p className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 max-w-3xl mx-auto px-4 leading-relaxed text-teal-50">
             ගංවතුරෙන් අවතැන් වී සිටින ලමුන් සදහා පාසල් උපකරණ ලබාදීමේ වැඩසටහන. මේ ඔවුන්ට ඔබගේ උදව් අවශ්‍ය මොහොතයි.
           </p>
+
+          <div className="flex justify-center">
+            <Link
+              href="/guide"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white font-semibold transition-all hover:scale-105"
+            >
+              <BookOpen className="w-5 h-5" />
+              <span>User Guide / භාවිතා කරන ආකාරය</span>
+            </Link>
+          </div>
         </div>
       </div>
 
