@@ -46,7 +46,7 @@ export default function GuidePage() {
                     ]
                 }
             ],
-            note: "If you have any issues, please contact us at contact@techlumina.com or +94 (078) 869-5286."
+            note: "If you have any issues, please contact us at +94 (078) 869-5286."
         },
         si: {
             title: "EduReliefLK භාවිතා කරන ආකාරය",
@@ -86,7 +86,7 @@ export default function GuidePage() {
                     ]
                 }
             ],
-            note: "ඔබට යම් ගැටළුවක් ඇත්නම්, කරුණාකර contact@techlumina.com හෝ +94 (078) 869-5286 හරහා අපව අමතන්න."
+            note: "ඔබට යම් ගැටළුවක් ඇත්නම්, කරුණාකර +94 (078) 869-5286 හරහා අපව අමතන්න."
         }
     }
 
