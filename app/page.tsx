@@ -85,7 +85,8 @@ export default function Home() {
   const [isSimilarMatch, setIsSimilarMatch] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
+  const [viewRequest, setViewRequest] = useState<MaterialRequest | null>(null)
+  const [showViewModal, setShowViewModal] = useState(false)
 
   const fetchRequests = async (page = 1, filters = appliedFilters) => {
     setLoading(true)
@@ -610,83 +611,74 @@ export default function Home() {
             </div>
           ) : filteredRequests.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredRequests.map((request) => {
-                const isExpanded = expandedCardId === request.id
-                return (
-                  <div
-                    key={request.id}
-                    onClick={() => setExpandedCardId(isExpanded ? null : request.id)}
-                    className="bg-white p-5 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 hover:border-teal-200 cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-gradient-to-br from-teal-100 to-emerald-50 p-3 rounded-xl">
-                        <FileText className="text-teal-600 w-6 h-6" />
-                      </div>
-                      <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${getStatusColor(request.status)}`}>
-                        {request.status}
-                      </span>
+              {filteredRequests.map((request) => (
+                <div
+                  key={request.id}
+                  onClick={() => {
+                    setViewRequest(request)
+                    setShowViewModal(true)
+                  }}
+                  className="bg-white p-5 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 hover:border-teal-200 cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="bg-gradient-to-br from-teal-100 to-emerald-50 p-3 rounded-xl">
+                      <FileText className="text-teal-600 w-6 h-6" />
                     </div>
+                    <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${getStatusColor(request.status)}`}>
+                      {request.status}
+                    </span>
+                  </div>
 
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <SchoolIcon className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-1">{request.school.name}</h3>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <MapPin className="w-4 h-4 flex-shrink-0" />
-                        <span className="line-clamp-1">{request.school.district}</span>
-                      </div>
-                      {request.school.contactName && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                          <User className="w-4 h-4 flex-shrink-0" />
-                          <span className="line-clamp-1">{request.school.contactName}</span>
-                        </div>
-                      )}
-                      {request.school.contactNumber && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Phone className="w-4 h-4 flex-shrink-0" />
-                          <span className="line-clamp-1">{request.school.contactNumber}</span>
-                        </div>
-                      )}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <SchoolIcon className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-1">{request.school.name}</h3>
                     </div>
-
-                    {request.description && (
-                      <div className="mb-4">
-                        <p className={`text-sm text-gray-700 transition-all ${isExpanded ? '' : 'line-clamp-2'}`}>
-                          {request.description}
-                        </p>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <span className="line-clamp-1">{request.school.district}</span>
+                    </div>
+                    {request.school.contactName && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                        <User className="w-4 h-4 flex-shrink-0" />
+                        <span className="line-clamp-1">{request.school.contactName}</span>
                       </div>
                     )}
-
-                    <div className="border-t border-gray-100 pt-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-2">Materials Needed:</p>
-                      <ul className="space-y-1.5">
-                        {(isExpanded ? request.items : request.items.slice(0, 3)).map((item) => (
-                          <li key={item.id} className="text-sm text-gray-600 flex justify-between items-center">
-                            <span className="line-clamp-1 flex-1">{item.material}</span>
-                            <span className="font-semibold text-gray-900 ml-2">×{item.quantity}</span>
-                          </li>
-                        ))}
-                        {!isExpanded && request.items.length > 3 && (
-                          <li className="text-sm text-teal-600 font-medium">
-                            +{request.items.length - 3} more items
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Clock className="w-3.5 h-3.5" />
-                        {new Date(request.createdAt).toLocaleDateString()}
+                    {request.school.contactNumber && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4 flex-shrink-0" />
+                        <span className="line-clamp-1">{request.school.contactNumber}</span>
                       </div>
-                      <button className="text-xs text-teal-600 font-medium hover:text-teal-700">
-                        {isExpanded ? 'Show Less' : 'Show More'}
-                      </button>
-                    </div>
+                    )}
                   </div>
-                )
-              })}
+
+                  {request.description && (
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-2">{request.description}</p>
+                  )}
+
+                  <div className="border-t border-gray-100 pt-4">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Materials Needed:</p>
+                    <ul className="space-y-1.5">
+                      {request.items.slice(0, 3).map((item) => (
+                        <li key={item.id} className="text-sm text-gray-600 flex justify-between items-center">
+                          <span className="line-clamp-1 flex-1">{item.material}</span>
+                          <span className="font-semibold text-gray-900 ml-2">×{item.quantity}</span>
+                        </li>
+                      ))}
+                      {request.items.length > 3 && (
+                        <li className="text-sm text-teal-600 font-medium">
+                          +{request.items.length - 3} more items
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+                    <Clock className="w-3.5 h-3.5" />
+                    {new Date(request.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-12 sm:py-16 bg-white rounded-xl border-2 border-dashed border-gray-300">
@@ -1330,6 +1322,99 @@ export default function Home() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        )
+      }
+
+      {/* View Request Details Modal */}
+      {
+        showViewModal && viewRequest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+                <h2 className="text-2xl font-bold text-gray-900">Request Details</h2>
+                <button
+                  onClick={() => {
+                    setShowViewModal(false)
+                    setViewRequest(null)
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Status Badge */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-gradient-to-br from-teal-100 to-emerald-50 p-3 rounded-xl">
+                      <FileText className="text-teal-600 w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Material Request</h3>
+                      <p className="text-sm text-gray-500">Created on {new Date(viewRequest.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <span className={`text-sm font-semibold px-4 py-2 rounded-full ${getStatusColor(viewRequest.status)}`}>
+                    {viewRequest.status}
+                  </span>
+                </div>
+
+                {/* School Information */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-base flex items-center gap-2">
+                    <SchoolIcon className="w-5 h-5 text-teal-600" />
+                    School Information
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex flex-wrap items-baseline gap-1">
+                      <span className="font-semibold text-gray-700">Name:</span>
+                      <span className="text-gray-900">{viewRequest.school.name}</span>
+                    </div>
+                    <div className="flex flex-wrap items-baseline gap-1">
+                      <span className="font-semibold text-gray-700">District:</span>
+                      <span className="text-gray-900">{viewRequest.school.district}</span>
+                    </div>
+                    {viewRequest.school.contactName && (
+                      <div className="flex flex-wrap items-baseline gap-1">
+                        <span className="font-semibold text-gray-700">Contact Person:</span>
+                        <span className="text-gray-900">{viewRequest.school.contactName}</span>
+                      </div>
+                    )}
+                    {viewRequest.school.contactNumber && (
+                      <div className="flex flex-wrap items-baseline gap-1">
+                        <span className="font-semibold text-gray-700">Contact Number:</span>
+                        <span className="text-gray-900">{viewRequest.school.contactNumber}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Full Description */}
+                {viewRequest.description && (
+                  <div className="bg-white rounded-xl p-5 border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Description</h4>
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{viewRequest.description}</p>
+                  </div>
+                )}
+
+                {/* All Materials */}
+                <div className="bg-white rounded-xl p-5 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-base">Materials Needed</h4>
+                  <ul className="space-y-2">
+                    {viewRequest.items.map((item) => (
+                      <li key={item.id} className="flex justify-between items-center text-sm bg-gray-50 p-3 rounded-lg">
+                        <span className="text-gray-900 font-medium">{item.material}</span>
+                        <span className="font-bold text-teal-600">×{item.quantity}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         )
