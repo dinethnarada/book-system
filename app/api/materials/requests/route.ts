@@ -45,32 +45,33 @@ export async function GET(request: Request) {
     const district = searchParams.get('district')
     const status = searchParams.get('status')
 
-    // Build where clause
-    const where: any = {}
-
-    if (status) {
-        where.status = status
-    }
-
+    // Build base where clause (School & District only) for stats
+    const baseWhere: any = {}
     if (schoolName || district) {
-        where.school = {}
+        baseWhere.school = {}
         if (schoolName) {
-            where.school.name = {
+            baseWhere.school.name = {
                 contains: schoolName,
                 mode: 'insensitive',
             }
         }
         if (district) {
-            where.school.district = district
+            baseWhere.school.district = district
         }
     }
 
+    // Build final where clause (Base + Status) for fetching data
+    const finalWhere = { ...baseWhere }
+    if (status) {
+        finalWhere.status = status
+    }
+
     try {
-        const [requests, total] = await Promise.all([
+        const [requests, total, statsGrouped] = await Promise.all([
             prisma.materialRequest.findMany({
                 skip,
                 take: limit,
-                where,
+                where: finalWhere,
                 include: {
                     school: {
                         select: {
@@ -82,12 +83,33 @@ export async function GET(request: Request) {
                     items: true,
                 },
                 orderBy: [
-                    { status: 'desc' }, // PENDING > FULFILLED > ASSIGNED (alphabetical desc: P, F, A)
+                    { status: 'desc' }, // PENDING > FULFILLED > ASSIGNED
                     { createdAt: 'asc' }, // Oldest first
                 ],
             }),
-            prisma.materialRequest.count({ where }),
+            prisma.materialRequest.count({ where: finalWhere }),
+            prisma.materialRequest.groupBy({
+                by: ['status'],
+                where: baseWhere,
+                _count: {
+                    status: true,
+                },
+            }),
         ])
+
+        // Format stats
+        const stats = {
+            pending: 0,
+            assigned: 0,
+            fulfilled: 0,
+        }
+
+        statsGrouped.forEach((group) => {
+            const s = group.status.toLowerCase() as keyof typeof stats
+            if (stats.hasOwnProperty(s)) {
+                stats[s] = group._count.status
+            }
+        })
 
         const response = NextResponse.json({
             data: requests,
@@ -97,6 +119,7 @@ export async function GET(request: Request) {
                 limit,
                 totalPages: Math.ceil(total / limit),
             },
+            stats,
         })
 
         // Add Cache-Control header

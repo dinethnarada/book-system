@@ -48,6 +48,11 @@ export default function Home() {
     district: '',
     status: ''
   })
+  const [stats, setStats] = useState({
+    pending: 0,
+    assigned: 0,
+    fulfilled: 0
+  })
 
   // Dashboard modal states
   const [showEditModal, setShowEditModal] = useState(false)
@@ -99,6 +104,9 @@ export default function Home() {
         if (responseData.meta) {
           setTotalPages(responseData.meta.totalPages)
           setCurrentPage(responseData.meta.page)
+        }
+        if (responseData.stats) {
+          setStats(responseData.stats)
         }
       } else {
         setRequests([])
@@ -379,9 +387,7 @@ export default function Home() {
   const filteredRequests = requests
 
   // Calculate statistics
-  const pendingCount = requests.filter(r => r.status === 'PENDING').length
-  const assignedCount = requests.filter(r => r.status === 'ASSIGNED').length
-  const fulfilledCount = requests.filter(r => r.status === 'FULFILLED').length
+  // Now using server-provided stats
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -481,21 +487,6 @@ export default function Home() {
               පාසල් උපකරණ සදහා ඉල්ලීම් සොයන්න
             </p>
 
-            {/* Statistics */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mb-8">
-              <div className="bg-gradient-to-br from-yellow-50 to-amber-50 p-4 sm:p-6 rounded-xl border border-yellow-100">
-                <div className="text-3xl sm:text-4xl font-bold text-yellow-700 mb-1">{pendingCount}</div>
-                <div className="text-xs sm:text-sm font-semibold text-gray-700">Pending Requests</div>
-              </div>
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 rounded-xl border border-green-100">
-                <div className="text-3xl sm:text-4xl font-bold text-green-700 mb-1">{assignedCount}</div>
-                <div className="text-xs sm:text-sm font-semibold text-gray-700">Assigned Requests</div>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 sm:p-6 rounded-xl border border-blue-100">
-                <div className="text-3xl sm:text-4xl font-bold text-blue-700 mb-1">{fulfilledCount}</div>
-                <div className="text-xs sm:text-sm font-semibold text-gray-700">Fulfilled Requests</div>
-              </div>
-            </div>
           </div>
 
           {/* Search Filters */}
@@ -579,6 +570,22 @@ export default function Home() {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Statistics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mb-8">
+            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 p-4 sm:p-6 rounded-xl border border-yellow-100">
+              <div className="text-3xl sm:text-4xl font-bold text-yellow-700 mb-1">{stats.pending}</div>
+              <div className="text-xs sm:text-sm font-semibold text-gray-700">Pending Requests</div>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 rounded-xl border border-green-100">
+              <div className="text-3xl sm:text-4xl font-bold text-green-700 mb-1">{stats.assigned}</div>
+              <div className="text-xs sm:text-sm font-semibold text-gray-700">Assigned Requests</div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 sm:p-6 rounded-xl border border-blue-100">
+              <div className="text-3xl sm:text-4xl font-bold text-blue-700 mb-1">{stats.fulfilled}</div>
+              <div className="text-xs sm:text-sm font-semibold text-gray-700">Fulfilled Requests</div>
+            </div>
           </div>
 
           {loading ? (
