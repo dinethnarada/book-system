@@ -85,6 +85,7 @@ export default function Home() {
   const [isSimilarMatch, setIsSimilarMatch] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
   const fetchRequests = async (page = 1, filters = appliedFilters) => {
     setLoading(true)
@@ -609,67 +610,83 @@ export default function Home() {
             </div>
           ) : filteredRequests.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredRequests.map((request) => (
-                <div key={request.id} className="bg-white p-5 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 hover:border-teal-200">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="bg-gradient-to-br from-teal-100 to-emerald-50 p-3 rounded-xl">
-                      <FileText className="text-teal-600 w-6 h-6" />
-                    </div>
-                    <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${getStatusColor(request.status)}`}>
-                      {request.status}
-                    </span>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <SchoolIcon className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-1">{request.school.name}</h3>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                      <MapPin className="w-4 h-4 flex-shrink-0" />
-                      <span className="line-clamp-1">{request.school.district}</span>
-                    </div>
-                    {request.school.contactName && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                        <User className="w-4 h-4 flex-shrink-0" />
-                        <span className="line-clamp-1">{request.school.contactName}</span>
+              {filteredRequests.map((request) => {
+                const isExpanded = expandedCardId === request.id
+                return (
+                  <div
+                    key={request.id}
+                    onClick={() => setExpandedCardId(isExpanded ? null : request.id)}
+                    className="bg-white p-5 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 hover:border-teal-200 cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="bg-gradient-to-br from-teal-100 to-emerald-50 p-3 rounded-xl">
+                        <FileText className="text-teal-600 w-6 h-6" />
                       </div>
-                    )}
-                    {request.school.contactNumber && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Phone className="w-4 h-4 flex-shrink-0" />
-                        <span className="line-clamp-1">{request.school.contactNumber}</span>
+                      <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${getStatusColor(request.status)}`}>
+                        {request.status}
+                      </span>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <SchoolIcon className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-1">{request.school.name}</h3>
                       </div>
-                    )}
-                  </div>
-
-                  {request.description && (
-                    <p className="text-sm text-gray-700 mb-4 line-clamp-2">{request.description}</p>
-                  )}
-
-                  <div className="border-t border-gray-100 pt-4">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Materials Needed:</p>
-                    <ul className="space-y-1.5">
-                      {request.items.slice(0, 3).map((item) => (
-                        <li key={item.id} className="text-sm text-gray-600 flex justify-between items-center">
-                          <span className="line-clamp-1 flex-1">{item.material}</span>
-                          <span className="font-semibold text-gray-900 ml-2">×{item.quantity}</span>
-                        </li>
-                      ))}
-                      {request.items.length > 3 && (
-                        <li className="text-sm text-teal-600 font-medium">
-                          +{request.items.length - 3} more items
-                        </li>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                        <span className="line-clamp-1">{request.school.district}</span>
+                      </div>
+                      {request.school.contactName && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                          <User className="w-4 h-4 flex-shrink-0" />
+                          <span className="line-clamp-1">{request.school.contactName}</span>
+                        </div>
                       )}
-                    </ul>
-                  </div>
+                      {request.school.contactNumber && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="w-4 h-4 flex-shrink-0" />
+                          <span className="line-clamp-1">{request.school.contactNumber}</span>
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
-                    <Clock className="w-3.5 h-3.5" />
-                    {new Date(request.createdAt).toLocaleDateString()}
+                    {request.description && (
+                      <div className="mb-4">
+                        <p className={`text-sm text-gray-700 transition-all ${isExpanded ? '' : 'line-clamp-2'}`}>
+                          {request.description}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="border-t border-gray-100 pt-4">
+                      <p className="text-sm font-semibold text-gray-700 mb-2">Materials Needed:</p>
+                      <ul className="space-y-1.5">
+                        {(isExpanded ? request.items : request.items.slice(0, 3)).map((item) => (
+                          <li key={item.id} className="text-sm text-gray-600 flex justify-between items-center">
+                            <span className="line-clamp-1 flex-1">{item.material}</span>
+                            <span className="font-semibold text-gray-900 ml-2">×{item.quantity}</span>
+                          </li>
+                        ))}
+                        {!isExpanded && request.items.length > 3 && (
+                          <li className="text-sm text-teal-600 font-medium">
+                            +{request.items.length - 3} more items
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Clock className="w-3.5 h-3.5" />
+                        {new Date(request.createdAt).toLocaleDateString()}
+                      </div>
+                      <button className="text-xs text-teal-600 font-medium hover:text-teal-700">
+                        {isExpanded ? 'Show Less' : 'Show More'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-12 sm:py-16 bg-white rounded-xl border-2 border-dashed border-gray-300">
