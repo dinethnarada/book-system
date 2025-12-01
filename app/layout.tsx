@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: "Sri Lanka Flood Relief - Educational Material Support",
     template: "%s | Sri Lanka Flood Relief"
   },
-  description: "Supporting flood-affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
+  description: "Supporting flood affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
   keywords: ["Sri Lanka Flood Relief", "Education Support", "Donate Books", "Flood Victims Sri Lanka", "School Supplies Donation", "Rebuild Education", "Volunteer Sri Lanka"],
   authors: [{ name: "EduReliefLK" }],
   creator: "EduReliefLK",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Sri Lanka Flood Relief - Educational Material Support",
-    description: "Supporting flood-affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
+    description: "Supporting flood affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
     url: 'https://www.edurelieflk.org',
     siteName: 'Sri Lanka Flood Relief',
     locale: 'en_US',
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "Sri Lanka Flood Relief - Educational Material Support",
-    description: "Supporting flood-affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
+    description: "Supporting fected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
     images: ['/flood-hero-bg.jpg'],
   },
   alternates: {
