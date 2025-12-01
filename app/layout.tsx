@@ -15,8 +15,52 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sri Lanka Flood Relief - Educational Material Support",
+  metadataBase: new URL('https://www.edurelieflk.org'),
+  title: {
+    default: "Sri Lanka Flood Relief - Educational Material Support",
+    template: "%s | Sri Lanka Flood Relief"
+  },
   description: "Supporting flood-affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
+  keywords: ["Sri Lanka Flood Relief", "Education Support", "Donate Books", "Flood Victims Sri Lanka", "School Supplies Donation", "Rebuild Education", "Volunteer Sri Lanka"],
+  authors: [{ name: "EduReliefLK" }],
+  creator: "EduReliefLK",
+  publisher: "EduReliefLK",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: "Sri Lanka Flood Relief - Educational Material Support",
+    description: "Supporting flood-affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
+    url: 'https://www.edurelieflk.org',
+    siteName: 'Sri Lanka Flood Relief',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: '/flood-hero-bg.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Sri Lanka Flood Relief - Educational Material Support',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Sri Lanka Flood Relief - Educational Material Support",
+    description: "Supporting flood-affected students in Sri Lanka with essential educational materials. Help us rebuild education, one book at a time.",
+    images: ['/flood-hero-bg.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.edurelieflk.org',
+  },
 };
 
 export default function RootLayout({
