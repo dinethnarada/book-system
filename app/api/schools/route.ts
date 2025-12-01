@@ -94,12 +94,11 @@ export async function POST(request: Request) {
 
         if (existingSchool) {
             return NextResponse.json(
-                { error: 'A school with this name already exists in this district. Please contact the school administrator to submit a request.' },
+                { error: 'A school with this name already exists in this district. Please contact the school administrator' },
                 { status: 409 }
             )
         }
 
-        console.log('Creating school with data:', { name, district, address, contactName, contactNumber })
 
         const school = await prisma.school.create({
             data: {
