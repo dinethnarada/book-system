@@ -48,7 +48,8 @@ export default function () {
         const getSchoolsRes = http.get(`${BASE_URL}/api/schools?district=Colombo`);
         check(getSchoolsRes, {
             'get schools status is 200': (r) => r.status === 200,
-            'get schools returns array': (r) => Array.isArray(r.json()),
+            'get schools returns data array': (r) => Array.isArray(r.json('data')),
+            'get schools has meta': (r) => r.json('meta') !== undefined,
         });
 
         if (schoolId) {

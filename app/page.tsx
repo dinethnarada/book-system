@@ -79,9 +79,9 @@ export default function Home() {
     setLoading(true)
     try {
       const res = await fetch('/api/materials/requests')
-      const data = await res.json()
-      if (Array.isArray(data)) {
-        setRequests(data)
+      const responseData = await res.json()
+      if (responseData.data && Array.isArray(responseData.data)) {
+        setRequests(responseData.data)
       } else {
         setRequests([])
       }
@@ -97,7 +97,11 @@ export default function Home() {
     // Fetch schools for submit modal
     fetch('/api/schools')
       .then(res => res.json())
-      .then(data => setSchools(data))
+      .then(responseData => {
+        if (responseData.data && Array.isArray(responseData.data)) {
+          setSchools(responseData.data)
+        }
+      })
       .catch(err => console.error('Failed to fetch schools:', err))
   }, [])
 

@@ -35,17 +35,47 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const skip = (page - 1) * limit
+
     try {
-        const requests = await prisma.materialRequest.findMany({
-            include: {
-                school: true,
-                items: true,
-            },
-            orderBy: {
-                createdAt: 'desc',
+        const [requests, total] = await Promise.all([
+            prisma.materialRequest.findMany({
+                skip,
+                take: limit,
+                include: {
+                    school: {
+                        select: {
+                            id: true,
+                            name: true,
+                            district: true,
+                        },
+                    },
+                    items: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            }),
+            prisma.materialRequest.count(),
+        ])
+
+        const response = NextResponse.json({
+            data: requests,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
             },
         })
-        return NextResponse.json(requests)
+
+        // Add Cache-Control header
+        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
+
+        return response
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch requests' }, { status: 500 })
     }

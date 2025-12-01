@@ -5,18 +5,49 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const name = searchParams.get('name')
     const district = searchParams.get('district')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const skip = (page - 1) * limit
 
     try {
-        const schools = await prisma.school.findMany({
-            where: {
-                AND: [
-                    name ? { name: { contains: name, mode: 'insensitive' } } : {},
-                    district ? { district: { contains: district, mode: 'insensitive' } } : {},
-                ],
+        const [schools, total] = await Promise.all([
+            prisma.school.findMany({
+                where: {
+                    AND: [
+                        name ? { name: { contains: name, mode: 'insensitive' } } : {},
+                        district ? { district: { contains: district, mode: 'insensitive' } } : {},
+                    ],
+                },
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+            }),
+            prisma.school.count({
+                where: {
+                    AND: [
+                        name ? { name: { contains: name, mode: 'insensitive' } } : {},
+                        district ? { district: { contains: district, mode: 'insensitive' } } : {},
+                    ],
+                },
+            }),
+        ])
+
+        const response = NextResponse.json({
+            data: schools,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
             },
         })
-        return NextResponse.json(schools)
+
+        // Add Cache-Control header
+        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
+
+        return response
     } catch (error) {
+        console.error('Error fetching schools:', error)
         return NextResponse.json({ error: 'Failed to fetch schools' }, { status: 500 })
     }
 }
