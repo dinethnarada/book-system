@@ -10,7 +10,7 @@ export default function GuidePage() {
     const content = {
         en: {
             title: "How to Use EduReliefLK",
-            subtitle: "A step-by-step guide to requesting and managing educational material support.",
+            subtitle: "A step by step guide to requesting and managing educational material support.",
             backToHome: "Back to Home",
             sections: [
                 {

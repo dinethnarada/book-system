@@ -431,7 +431,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 max-w-3xl mx-auto px-4 leading-relaxed text-teal-50">
-            ගංවතුරෙන් අවතැන් වී සිටින ලමුන් සදහා පාසල් උපකරණ ලබාදීමේ වැඩසටහන. මේ ඔවුන්ට ඔබගේ උදව් අවශ්‍ය මොහොතයි.
+            ගංවතුර තත්ත්වය නිසා පීඩාවට පත්ව සිටින සිසුන් සහ ඔවුන්ට පාසල් උපකරණ මගින් උපකාර කිරීමට කැමති පිරිස් සම්බන්ධීකරණ වැඩසටහන. මේ ඔවුන්ට ඔබගේ උදව් අවශ්‍යම මොහොතයි.
           </p>
 
           <div className="flex justify-center">
@@ -450,7 +450,7 @@ export default function Home() {
       <div className="bg-white py-12 sm:py-16 border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Get Started</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Manage Requests</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               {/* Submit Request Card */}
@@ -483,7 +483,7 @@ export default function Home() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Edit Request Status</h3>
                     <p className="text-gray-600 mb-6">
-                      පාසල් උපකරණ සදහා ඉල්ලීමක නව තත්වය වෙනස් කිර්‍රම
+                      පාසල් උපකරණ සදහා කර ඇති ඉල්ලීමක නව තත්වය වෙනස් කිර්‍රම
                     </p>
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export default function Home() {
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">Material Requests</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-              පාසල් උපකරණ සදහා ඉල්ලීම් සොයන්න
+              පාසල් උපකරණ සදහා කර ඇති ඉල්ලීම් සොයන්න
             </p>
 
           </div>
