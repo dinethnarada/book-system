@@ -61,6 +61,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://www.edurelieflk.org',
   },
+  verification: {
+    google: 'huZfp30IGyxLWu6FcaDyTWZkF-ig68c_7_1bxMo8R1s',
+  },
 };
 
 export default function RootLayout({
